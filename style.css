@@ -1,0 +1,39 @@
+.shadow {
+  border: 2px solid;
+  padding: 10px;
+  box-shadow: 6px 4px;
+}
+
+
+.itemframe {
+  border: 2px solid;
+  padding: 10px;
+  box-shadow: 6px 4px;
+  width: 900px;
+}
+
+.topInfo {
+  width:1100px;
+  padding:10px;
+}
+
+.fbBox {
+  width:1100px;
+  padding:10px;
+}
+
+.itemListTable {
+  border-spacing: 15px;
+}
+
+.movieImg {
+  width: 180px;
+  height: 250px;
+  object-fit: cover;
+}
+
+.titleImg {
+  width: 360px;
+  height: 500px;
+  object-fit: cover;
+}
