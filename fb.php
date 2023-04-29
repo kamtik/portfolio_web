@@ -2,10 +2,29 @@
 <html>
 <head>
 <link rel="stylesheet" href="style.css">
+<script type="text/javascript">
+  function toggleDesc() {
+  const updDesc = document.getElementById("updDesc");
+  if(updDesc.hidden==true)
+    updDesc.hidden = false;
+  else
+    updDesc.hidden = true;
+}
+</script>
 </head>
 <body>
+  <a href="index.html"><div id="heading"><table><tbody><tr><td align="left" ><object data="svg/M.svg" width="100" height="100"></object></td><td valign="center"><font size="5">My Movie Review</font></td></tr></tbody></table></div></a>
   <div id="loading">Loading...</div>
   <div id="a1"></div>
+
+  <div><table width="1100"><tbody><tr><td align="right"><button onClick="toggleDesc()" >Update Movie Description Form</button></td></tr></tbody></table></div>
+  <div id="updDesc" hidden="true">
+    <form id="descForm" action="api/public/movie/update/<?php echo $_GET["id"]; ?>">
+      <textarea id="descText" name="description" cols="100" rows="12"></textarea>
+      <input id="descButton" type="submit" value="Update Description" />
+    </form>
+</div>
+
   <div>Feedbacks : </div>
   <div id="aInput"></div>
   <div>
@@ -143,7 +162,6 @@ let FeedbackInput = function FbInput(props) {
 //aInput.render(<FeedbackInput />);
 
 
-
 const api_url_movie =
     "api/public/movie/"+<?php echo $_GET["id"] ?>;
 
@@ -155,6 +173,29 @@ async function postFormDataAsJson({ url, formData }) {
 
 	const fetchOptions = {
 		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			Accept: "application/json",
+		},
+		body: formDataJsonString,
+	};
+
+	const response = await fetch(url, fetchOptions);
+
+	if (!response.ok) {
+		const errorMessage = await response.text();
+		throw new Error(errorMessage);
+	}
+
+	return response.json();
+}
+
+async function putFormDataAsJson({ url, formData }) {
+	const plainFormData = Object.fromEntries(formData.entries());
+	const formDataJsonString = JSON.stringify(plainFormData);
+
+	const fetchOptions = {
+		method: "PUT",
 		headers: {
 			"Content-Type": "application/json",
 			Accept: "application/json",
@@ -239,6 +280,35 @@ async function handleFormSubmit(event) {
 const fbForm = document.getElementById("feedbackForm");
 fbForm.addEventListener("submit",handleFormSubmit);
 
+
+async function handleDescFormSubmit(event) {
+  event.preventDefault();
+  const button = document.getElementById("descButton");
+  button.disabled = true;
+
+  const form = event.currentTarget;
+  const url = form.action;
+
+  try {
+    const formData = new FormData(form);
+    const responseData = await putFormDataAsJson({ url, formData });
+
+    console.log({ responseData });
+    form.reset();
+  } catch (error) {
+    console.error(error);
+  }
+
+  button.disabled = false;
+  getinfoapi(api_url_movie);
+  getfbapi(api_url_fb);
+  toggleDesc();
+}
+
+const descForm = document.getElementById("descForm");
+descForm.addEventListener("submit",handleDescFormSubmit);
+
+const a1 = createRoot(document.getElementById('a1'));
 const a2 = createRoot(document.getElementById('a2'));
 
 
@@ -277,8 +347,10 @@ function hideloader() {
 }
 
 function showInfo(r) {
-  const a1 = createRoot(document.getElementById('a1'));
   a1.render(<><Info key={'info'+r.id} img={r.img} name={r.name} description={r.description} rate={r.rate} /></>);
+
+  const descText = document.getElementById('descText');
+  descText.innerHTML = r.description;
 }
 
 function showFb(data) {
